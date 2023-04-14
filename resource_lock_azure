@@ -1,0 +1,29 @@
+##Resource lock in Azure using Terraform
+###Put a lock on an Azure resource using Terraform is really easy.
+##Configure a CanNotDelete lock can be done like this :
+
+resource "azurerm_resource_group" "resource-group" {
+  name     = "my-resource-group"
+  location = "West Europe"
+}
+
+resource "azurerm_public_ip" "public-ip" {
+  name                    = "locked-publicip"
+  location                = azurerm_resource_group.resource-group.location
+  resource_group_name     = azurerm_resource_group.resource-group.name
+  allocation_method       = "Static"
+}
+
+resource "azurerm_management_lock" "lock-public-ip" {
+  name       = "lock-public-ip"
+  scope      = azurerm_public_ip.public-ip.id
+  lock_level = "CanNotDelete"
+  notes      = "Lock managed by Terraform"
+}
+###Configure a ReadOnly lock is exactly the same :
+
+resource "azurerm_management_lock" "lock-public-ip" {
+  name       = "lock-public-ip"
+  scope      = azurerm_public_ip.public-ip.id
+  lock_level = "ReadOnly"
+  notes      = "Lock managed by Terraform"
